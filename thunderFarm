@@ -1,0 +1,142 @@
+local farming = false
+
+local player = game:GetService("Players").LocalPlayer 
+local getCharacter = function() return player.Character end 
+local tweenService = game:GetService("TweenService")
+
+local function getMap()
+    for _,v in ipairs(workspace:GetChildren()) do 
+        if string.match(v.Name, "Map") and v:IsA("Model") then 
+            return v.Map
+        end
+    end
+end
+
+local function cleanMap()
+    local map = getMap()
+    
+    for _, v in pairs(map:GetChildren()) do 
+        if v.Name ~= "Ores" then 
+            v:Destroy()
+        end
+    end
+end
+
+local function getClosetsOre()
+    local character = getCharacter()
+    local hrp = character.HumanoidRootPart
+    local map = getMap()
+    local closestOre = nil  
+    
+    for _, v in ipairs(map.Ores:GetChildren()) do 
+        if closestOre == nil then 
+            closestOre = v
+        else 
+            local distance1 = math.abs((hrp.Position - closestOre.Position).Magnitude)
+            local distance2 = math.abs((hrp.Position - v.Position).Magnitude)
+            
+            if distance2 < distance1 then 
+                closestOre = v
+            end
+        end
+    end
+    
+    return closestOre
+end
+
+local function uncanCollideBlocks() 
+    local map = getMap()
+    local ores = map.Ores 
+    
+    for _, v in ipairs(ores:GetChildren()) do 
+        v.CanCollide = false 
+    end
+end
+
+local function shortenCharacter()
+    local character = getCharacter()
+    
+    if character:FindFirstChild("Right Leg") then 
+        character["Right Leg"]:Destroy()
+        character["Left Leg"]:Destroy()
+    end
+end
+
+local function canFarm()
+    local map = getMap()
+    
+    if map == nil then return false end
+    
+    local ores = map.Ores:GetChildren()
+    local tools = player.Backpack:GetChildren()
+    
+    local hasOres = #ores > 0
+    local hasTools = #tools > 0
+    
+    return hasOres and hasTools
+end
+
+local function equipAxe()
+    local tools = player.Backpack 
+    
+    if tools:FindFirstChild("Axe") then
+        local character = getCharacter()
+        tools.Axe.Parent = character
+    end
+end
+
+local event = nil
+local function goToBlock(block)
+    workspace.CurrentCamera.CameraSubject = block
+    local character = getCharacter()
+    local hrp = character.HumanoidRootPart
+    
+    if event ~= nil then 
+        event:Disconnect()
+    end
+    
+    local goal = {CFrame = block.CFrame}
+    local info = TweenInfo.new(8)
+    local tween = tweenService:Create(hrp, info, goal)
+    tween:Play()
+    
+    repeat wait() until math.abs((hrp.Position - block.Position).Magnitude) < 20
+    
+    tween:Pause()
+    
+    event = game:GetService("RunService").Stepped:Connect(function()
+        if farming then
+            hrp.Velocity = Vector3.new(0,0,0)
+            hrp.CFrame = block.CFrame * CFrame.new(0, -1, 0)
+        else 
+            event:Disconnect()
+        end
+    end)
+end
+
+local function startFarm(toggle)
+    farming = toggle
+    while farming do 
+        wait(0.5)
+        if canFarm() then
+            local character = getCharacter()
+            local block = getClosetsOre()
+            
+            spawn(function()
+                cleanMap()
+                uncanCollideBlocks()
+                shortenCharacter()
+            end)
+            
+            goToBlock(block)
+            
+            while block.Parent ~= nil and canFarm() and farming do
+                equipAxe()
+                character.Axe.RemoteEvent:FireServer(block)
+                wait(0.05)
+            end
+        end
+    end
+end
+
+return startFarm
