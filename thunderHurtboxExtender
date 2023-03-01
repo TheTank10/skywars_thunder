@@ -1,6 +1,6 @@
 local extend = false
 local size = 1
-local visualizerToggle = true
+local visualizerToggle = false
 
 local visualizer = Instance.new("Part")
 visualizer.Transparency = 0.5 
@@ -59,6 +59,8 @@ local function extendHurtbox(toggle)
                     visualizer.CFrame = sword.Handle.CFrame 
                     visualizer.Velocity = Vector3.new(0, 0, 0)
                     visualizer.Parent = workspace
+                else 
+                    visualizer.Parent = nil
                 end
                 
                 for _,v in ipairs(findPlayersInRange(size)) do 
