@@ -69,10 +69,10 @@ local function extendHurtbox(toggle)
             end
         end)
     else 
-        visualizer.Parent = nil
         if event then 
             event:Disconnect()
         end
+        visualizer.Parent = nil
     end
 end
 
