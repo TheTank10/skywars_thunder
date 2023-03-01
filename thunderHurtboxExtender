@@ -1,0 +1,83 @@
+local extend = false
+local size = 1
+local visualizerToggle = true
+
+local visualizer = Instance.new("Part")
+visualizer.Transparency = 0.5 
+visualizer.CanCollide = false 
+visualizer.Size = Vector3.new(size, size, size)
+
+local player = game:GetService("Players").LocalPlayer
+local getCharacter = function() return player.Character end
+
+local function getSword()
+    local character = getCharacter()
+    if character:FindFirstChild("Sword") then
+        return character.Sword 
+    end
+end
+
+local function doDamage(hit, handle)
+    firetouchinterest(hit,handle,0)
+    firetouchinterest(hit,handle,1)
+end
+
+local function findPlayersInRange(range)
+    local players = {}
+    local sword = getSword()
+    
+    for _,v in ipairs(game:GetService("Players"):GetPlayers()) do
+        if v ~= player then
+            local targetCharacter = v.Character 
+            
+            if targetCharacter and targetCharacter:FindFirstChild("HumanoidRootPart") then
+                if math.abs((sword.Handle.Position - targetCharacter.HumanoidRootPart.Position).Magnitude) < range then 
+                    table.insert(players, targetCharacter)
+                end
+            end
+        end
+    end
+    return players
+end
+
+local function changeSize(number)
+    visualizer.Size = Vector3.new(number, number, number)
+    size = number
+end
+
+local function toggleVisualizer(toggle)
+    visualizerToggle = toggle
+end
+
+local event = nil 
+local function extendHurtbox(toggle)
+    if toggle then
+        event = game:GetService("RunService").Stepped:Connect(function()
+            local sword = getSword() 
+            if sword then
+                if visualizerToggle then 
+                    visualizer.CFrame = sword.Handle.CFrame 
+                    visualizer.Velocity = Vector3.new(0, 0, 0)
+                    visualizer.Parent = workspace
+                end
+                
+                for _,v in ipairs(findPlayersInRange(size)) do 
+                    doDamage(v.HumanoidRootPart, sword.Handle)
+                end
+            else 
+                visualizer.Parent = nil
+            end
+        end)
+    else 
+        visualizer.Parent = nil
+        if event then 
+            event:Disconnect()
+        end
+    end
+end
+
+return {
+    ["extendHurtbox"] = extendHurtbox,
+    ["toggleVisualizer"] = toggleVisualizer,
+    ["changeSize"] = changeSize
+}
