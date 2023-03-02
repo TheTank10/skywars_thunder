@@ -61,6 +61,8 @@ local function farmWins(toggle)
             wait()
         end
     else 
+        local character = getCharacter()
+        local hrp = character:FindFirstChild("HumanoidRootPart")
         hrp.Anchored = false
         if inGame() then 
             killPlayer()
