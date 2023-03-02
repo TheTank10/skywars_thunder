@@ -1,0 +1,71 @@
+local farming = true
+
+local player = game:GetService("Players").LocalPlayer 
+local getCharacter = function() return player.Character end 
+local tweenService = game:GetService("TweenService")
+
+local travelPosition = Vector3.new(1000, 80, -112)
+
+local cameraPart = workspace.Decoration.SnowParticles
+local cameraCFrame = cameraPart.CFrame * CFrame.new(0, -100, 0)
+
+cameraPart = Instance.new("Part")
+cameraPart.Transparency = 1 
+cameraPart.CFrame = cameraCFrame
+cameraPart.Anchored = true 
+cameraPart.CanCollide = false 
+cameraPart.Parent = workspace
+
+local function inGame()
+    local backpack = player.Backpack:GetChildren()
+    if #backpack > 0 then 
+        return true 
+    end
+    return false
+end
+
+local function killPlayer()
+    local character = getCharacter()
+    character.HumanoidRootPart:Destroy() 
+end
+
+local function travel()
+    local character = getCharacter()
+    local hrp = character.HumanoidRootPart
+    
+    workspace.CurrentCamera.CameraSubject = cameraPart
+    
+    local goal = {CFrame = CFrame.new(travelPosition.X, travelPosition.Y, travelPosition.Z)}
+    local info = TweenInfo.new(50)
+    local tween = tweenService:Create(hrp, info, goal)
+    hrp.Anchored = false
+    tween:Play()
+    tween.Completed:Wait()
+    hrp.Anchored = true
+end
+
+local function farmWins(toggle)
+    farming = toggle
+    if toggle then 
+        while farming do 
+            local character = getCharacter()
+            local hrp = character:FindFirstChild("HumanoidRootPart")
+            
+            if hrp and hrp.Anchored == false then
+                if inGame() then
+                    travel()
+                else
+                    hrp.Anchored = false
+                end
+            end
+            wait()
+        end
+    else 
+        hrp.Anchored = false
+        if inGame() then 
+            killPlayer()
+        end
+    end
+end
+
+return farmWins
