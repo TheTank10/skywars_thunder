@@ -1,4 +1,4 @@
-local on = true
+local on = false
 
 local player = game:GetService("Players").LocalPlayer 
 local getCharacter = function() return player.Character end 
@@ -7,6 +7,15 @@ local runService = game:GetService("RunService")
 
 local target = nil
 local targetVisualizer = Instance.new("SelectionBox")
+
+local helperPart = Instance.new("Part")
+helperPart.Size = Vector3.new(500, 0, 500)
+helperPart.Position = Vector3.new(0.12, 100, -0.11)
+helperPart.CanCollide = false 
+helperPart.Transparency = 1
+helperPart.Anchored = true
+helperPart.Parent = workspace
+
 
 local function getBow()
    return getCharacter():FindFirstChild("Bow") 
