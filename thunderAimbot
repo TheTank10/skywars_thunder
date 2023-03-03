@@ -87,7 +87,7 @@ runService.Stepped:Connect(function()
             hrp = targetCharacter:FindFirstChild("HumanoidRootPart")
         end)
         
-        if target == nil then 
+        if target == nil or target:FindFirstChild("HumanoidRootPart") == nil then 
             target = targetCharacter 
             break
         end
