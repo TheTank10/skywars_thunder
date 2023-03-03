@@ -1,0 +1,107 @@
+local on = true
+
+local player = game:GetService("Players").LocalPlayer 
+local getCharacter = function() return player.Character end 
+local mouse = player:GetMouse()
+local runService = game:GetService("RunService")
+
+local target = nil
+local targetVisualizer = Instance.new("SelectionBox")
+
+local function getBow()
+   return getCharacter():FindFirstChild("Bow") 
+end
+
+local function handleBow()
+    local bow = getBow()
+    bow.ClientControl.OnClientInvoke = function()
+        if on then
+            return {
+                Position = target.HumanoidRootPart.Position,
+                Target = target.Head
+            }
+        else 
+            local position = mouse.Hit.p 
+            local target = mouse.Target 
+            
+            return {
+                Position = position,
+                Target = target
+            }
+        end
+    end
+end
+
+local function childAdded(child)
+    if child.Name == "Bow" then 
+        spawn (function()
+            while child.Parent == getCharacter() do
+                handleBow()
+                wait(2)
+            end
+        end)
+    end
+end
+
+local function characterAdded(character)
+    character.ChildAdded:Connect(function(child)
+        if child.Name == "Bow" then 
+            print("bow")
+            spawn (function()
+                while child.Parent ~= nil do
+                   wait(2)
+                   handleBow()
+                end
+            end)
+        end
+    end)
+end
+
+player.CharacterAdded:Connect(characterAdded)
+getCharacter().ChildAdded:Connect(childAdded)
+
+local bow = getBow()
+if bow then 
+    handleBow()
+end
+
+
+runService.Stepped:Connect(function()
+    local character = getCharacter()
+    for _, v in ipairs(game:GetService("Players"):GetPlayers()) do
+        if v == player then continue end
+        local targetCharacter = v.Character 
+        
+        if not character then continue end
+        
+        local hrp = nil
+        local _, _ = pcall(function()
+            hrp = targetCharacter:FindFirstChild("HumanoidRootPart")
+        end)
+        
+        if target == nil then 
+            target = targetCharacter 
+            break
+        end
+        
+        if not hrp then continue end
+        
+        local distance1 = math.abs((mouse.Hit.p - target.HumanoidRootPart.Position).Magnitude)
+        local distance2 = math.abs((mouse.Hit.p - hrp.Position).Magnitude)
+        
+        if distance2 < distance1 then 
+            target = targetCharacter
+        end
+    end
+    
+    if on then
+        targetVisualizer.Adornee = target
+        targetVisualizer.Parent = target 
+    else
+        targetVisualizer.Parent = nil
+    end
+end)
+
+return function(toggle)
+    on = toggle
+end
