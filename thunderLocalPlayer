@@ -1,0 +1,36 @@
+local player = game:GetService("Players").LocalPlayer 
+local getCharacter = function() return player.Character end 
+
+local walkSpeed = 16 
+local jumpPower = 50 
+
+OldIndex = nil
+OldIndex = hookmetamethod(game, "__newindex", function(self, index, value)
+    if not checkcaller() and index == "WalkSpeed" then
+        value = walkSpeed
+    elseif not checkcaller() and index == "JumpPower" then
+        value = jumpPower
+    end
+
+    return OldIndex(self, index, value)
+end)
+
+spawn(function()
+    while true do 
+        local _,_ = pcall(function()
+            getCharacter().Humanoid.WalkSpeed = walkSpeed
+            getCharacter().Humanoid.JumpPower = jumpPower
+        end)
+        wait(2)
+    end
+end)
+
+local function changeWalkSpeed(number)
+    walkSpeed = number
+end
+
+local function changeJumpPower(number)
+    jumpPower  = number
+end
+
+return {["WalkSpeed"] = changeWalkSpeed, ["JumpPower"] = changeJumpPower}
