@@ -1,0 +1,39 @@
+local on = true
+
+local player = game:GetService("Players").LocalPlayer 
+local getCharacter = function() return player.Character end 
+local userInputService = game:GetService("UserInputService")
+local mouse = player:GetMouse()
+
+local function getPicaxe()
+    return getCharacter():FindFirstChild("Axe")
+end
+
+local function breakBlock(block)
+    local picAxe = getPicaxe()
+    
+    if picAxe then 
+        while block.Parent ~= nil do
+            picAxe.RemoteEvent:FireServer(block)
+            wait(0.1)
+        end
+    end
+end
+
+local blacklist = {}
+
+userInputService.InputBegan:Connect(function(input, _processed)
+    if _processed then return end 
+    
+    if input.UserInputType == Enum.UserInputType.MouseButton1 and on then 
+        local part = mouse.Target 
+        if part and part.Name == "Block" and not table.find(blacklist, part) then 
+            table.insert(blacklist, part)
+            breakBlock(part)
+        end
+    end
+end)
+
+return function(toggle)
+    on = toggle
+end
