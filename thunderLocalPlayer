@@ -27,10 +27,12 @@ end)
 
 local function changeWalkSpeed(number)
     walkSpeed = number
+    getCharacter().Humanoid.WalkSpeed = walkSpeed
 end
 
 local function changeJumpPower(number)
     jumpPower  = number
+    getCharacter().Humanoid.JumpPower = jumpPower
 end
 
 return {["WalkSpeed"] = changeWalkSpeed, ["JumpPower"] = changeJumpPower}
