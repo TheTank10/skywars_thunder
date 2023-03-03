@@ -24,6 +24,7 @@ end
 
 local function findPlayersInRange(range)
     local players = {}
+    local character = getCharacter()
     local sword = getSword()
     
     for _,v in ipairs(game:GetService("Players"):GetPlayers()) do
@@ -31,7 +32,7 @@ local function findPlayersInRange(range)
             local targetCharacter = v.Character 
             
             if targetCharacter and targetCharacter:FindFirstChild("HumanoidRootPart") then
-                if math.abs((sword.Handle.Position - targetCharacter.HumanoidRootPart.Position).Magnitude) < range then 
+                if math.abs((character.HumanoidRootPart.Position - targetCharacter.HumanoidRootPart.Position).Magnitude) < range then 
                     table.insert(players, targetCharacter)
                 end
             end
