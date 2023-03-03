@@ -27,7 +27,7 @@ local function handleBow()
         if on then
             return {
                 Position = target.HumanoidRootPart.Position,
-                Target = target.Head
+                Target = target.Torso
             }
         else 
             local position = mouse.Hit.p 
@@ -55,7 +55,6 @@ end
 local function characterAdded(character)
     character.ChildAdded:Connect(function(child)
         if child.Name == "Bow" then 
-            print("bow")
             spawn (function()
                 while child.Parent ~= nil do
                    wait(2)
